@@ -6,15 +6,16 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
-import random 
+import random
 from selenium import webdriver
+from selenium.common import exceptions
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from scrapy.http.response.html import HtmlResponse
 
+
 class UserAgentDownloadMiddleware(object):
-    
     USER_AGENTS = [
         'Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0; Acoo Browser 1.98.744; .NET CLR 3.5.30729)',
         'Mozilla/4.0 (compatible; MSIE 7.0; America Online Browser 1.1; Windows NT 5.1; (R1 1.5); .NET CLR 2.0.50727; InfoPath.1)',
@@ -28,25 +29,28 @@ class UserAgentDownloadMiddleware(object):
         'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:64.0) Gecko/20100101 Firefox/64.0',
         'Mozilla/5.0 (X11; Linux i686; rv:64.0) Gecko/20100101 Firefox/64.0'
     ]
-    
+
     def process_request(self, request, spider):
         user_agent = random.choice(self.USER_AGENTS)
         request.headers['User-Agent'] = user_agent
 
+
 class SeleniumDownloadMiddleware(object):
     def __init__(self):
         self.browser = webdriver.Firefox()
-        
+
     def process_request(self, request, spider):
         self.browser.get(request.url)
-        try:  
+        try:
             wait = WebDriverWait(self.browser, 1)
-            #find_newhouse = wait.until(EC.element_to_be_clickable((By.XPATH, '//div[@id="newhouse_loupai_list"]//li')))
-        except Exception as e:
-            print('='*80)
+            # find_newhouse = wait.until(EC.element_to_be_clickable((By.XPATH, '//div[@id="newhouse_loupai_list"]//li')))
+        except exceptions as e:
+            print('=' * 80)
             print("ERROR:", e)
-            print('='*80)
+            print('=' * 80)
+        else:
+            pass
         source = self.browser.page_source
-        response = HtmlResponse(url=self.browser.current_url, body=source, 
+        response = HtmlResponse(url=self.browser.current_url, body=source,
                                 request=request, encoding='utf-8')
-        return response    
+        return response

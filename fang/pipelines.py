@@ -8,20 +8,23 @@
 from scrapy.exporters import JsonLinesItemExporter
 from fang.items import NewHouseItem, ESFItem
 
+
 class FangPipeline(object):
     def __init__(self):
         self.newhouse_fp = open('newhouse.json', 'wb')
         self.esf_fp = open('esh.json', 'wb')
-        self.newhouse_exporter = JsonLinesItemExporter(self.newhouse_fp, ensure_ascii=False)
-        self.esf_exporter = JsonLinesItemExporter(self.esf_fp, ensure_ascii=False)
-        
+        self.newhouse_exporter = JsonLinesItemExporter(self.newhouse_fp,
+                                                       ensure_ascii=False)
+        self.esf_exporter = JsonLinesItemExporter(self.esf_fp,
+                                                  ensure_ascii=False)
+
     def process_item(self, item, spider):
         if isinstance(item, NewHouseItem):
             self.newhouse_exporter.export_item(item)
         elif isinstance(item, ESFItem):
             self.esf_exporter.export_item(item)
         return item
-    
+
     def close_spider(self, spider):
         self.newhouse_fp.close()
         self.esf_fp.close()
